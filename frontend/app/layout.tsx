@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Gudaguda Refactoring",
-  description: "Hackathon project",
+  title: "ぐだぐだリファクタリング",
+  description: "ぐだぐだを、やる気に変えよう",
 };
 
 export default function RootLayout({

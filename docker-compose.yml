@@ -23,8 +23,13 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
+      - ./agents:/app/agents
+      - ~/.config/gcloud:/root/.config/gcloud:ro
     environment:
       - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT}
+      - GOOGLE_CLOUD_LOCATION=${GOOGLE_CLOUD_LOCATION}
+      - GOOGLE_GENAI_USE_VERTEXAI=${GOOGLE_GENAI_USE_VERTEXAI}
     depends_on:
       - elasticsearch
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload

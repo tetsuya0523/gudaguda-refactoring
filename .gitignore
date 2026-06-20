@@ -19,6 +19,7 @@ __pycache__/
 *.py[cod]
 venv/
 .venv/
+.adk/
 
 # OS / Editor files
 .DS_Store

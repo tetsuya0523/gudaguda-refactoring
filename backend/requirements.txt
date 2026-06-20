@@ -2,3 +2,5 @@ fastapi
 uvicorn
 elasticsearch
 pydantic
+google-adk
+python-dotenv

@@ -23,3 +23,9 @@ venv/
 # OS / Editor files
 .DS_Store
 .vscode/
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl

@@ -2,9 +2,16 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# 依存関係
+COPY requirements.txt ./
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
+# ソース
 COPY . .
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Cloud Runは8080固定が安定
+EXPOSE 8080
+
+# 重要：reload禁止（Cloud Runで事故る）
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]

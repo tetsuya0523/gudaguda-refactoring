@@ -1,0 +1,82 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: asia-northeast1
+  REPOSITORY: gudaguda-refactoring-repo
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker
+        run: |
+          gcloud auth configure-docker asia-northeast1-docker.pkg.dev --quiet
+
+      #####################################
+      # Backend
+      #####################################
+
+      - name: Build Backend Image
+        run: |
+          docker build \
+            -f backend/Dockerfile.prod \
+            -t asia-northeast1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/backend:${{ github.sha }} \
+            backend
+
+      - name: Push Backend Image
+        run: |
+          docker push asia-northeast1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/backend:${{ github.sha }}
+
+      - name: Deploy Backend
+        run: |
+          gcloud run deploy backend \
+            --image asia-northeast1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/backend:${{ github.sha }} \
+            --region=$REGION \
+            --platform=managed \
+            --allow-unauthenticated
+
+      #####################################
+      # Frontend
+      #####################################
+
+      - name: Build Frontend Image
+        run: |
+          docker build \
+            -f frontend/Dockerfile.prod \
+            -t asia-northeast1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/frontend:${{ github.sha }} \
+            frontend
+
+      - name: Push Frontend Image
+        run: |
+          docker push asia-northeast1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/frontend:${{ github.sha }}
+
+      - name: Deploy Frontend
+        run: |
+          gcloud run deploy frontend \
+            --image asia-northeast1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/frontend:${{ github.sha }} \
+            --region=$REGION \
+            --platform=managed \
+            --allow-unauthenticated
